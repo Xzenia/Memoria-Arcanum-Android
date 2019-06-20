@@ -180,12 +180,16 @@ public class Grid : MonoBehaviour
                             StartCoroutine(gameScene.ExecuteMove(move));
                         }
 
+                        gameScene.correctMatch.Play();
+
                         GameScene.matches++;
                     }
                     else
                     {
                         Debug.Log("Tiles are different!");
                         StartCoroutine(HideSelectedTiles());
+
+                        gameScene.wrongMatch.Play();
                     }
                     selectedTiles.Clear();
                 }

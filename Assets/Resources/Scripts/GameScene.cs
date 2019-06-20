@@ -55,6 +55,13 @@ public class GameScene : MonoBehaviour
 
     public GameObject memorizePopup;
 
+    public AudioSource backgroundMusic;
+    public AudioSource wrongMatch;
+    public AudioSource correctMatch;
+    public AudioSource spellAttack;
+    public AudioSource normalAttack;
+    public AudioSource enemyAttack;
+
     void Start()
     {
         matches = 0;
@@ -148,6 +155,15 @@ public class GameScene : MonoBehaviour
         yield return new WaitForSeconds(1);
 
         StartCoroutine(ShowDamageCounter(enemyDamageCounter, move.attack));
+
+        if (player.name.Equals("Rikko"))
+        {
+            spellAttack.Play();
+        }
+        else
+        {
+            normalAttack.Play();
+        }
 
         int damage = (int)(player.attackStat - (player.attackStat * (currentEnemyObject.GetComponent<Enemy>().defenseStat / 100)));
         currentEnemyObject.GetComponent<Enemy>().DecreaseHealth(damage);
@@ -245,6 +261,8 @@ public class GameScene : MonoBehaviour
         enemyTurnIndicator.SetActive(true);
 
         StartCoroutine(ShowDamageCounter(playerDamageCounter, (int)enemy.attackStat));
+
+        enemyAttack.Play();
 
         int damage = (int)(enemy.attackStat - (enemy.attackStat * (player.defenseStat / 100)));
         player.DecreaseHealth(damage);

@@ -21,10 +21,8 @@ ScriptsOnlyBuild:
     UnityEditor.Graphs.dll:
     - UnityEditor.Graphs.AnimationBlendTree.Graph
     - UnityEditor.Graphs.AnimationBlendTree.GraphGUI
-    - UnityEditor.Graphs.AnimationStateMachine.AnyStateNode
     - UnityEditor.Graphs.AnimationStateMachine.Graph
     - UnityEditor.Graphs.AnimationStateMachine.GraphGUI
-    - UnityEditor.Graphs.AnimationStateMachine.StateNode
     - UnityEditor.Graphs.AnimatorControllerTool
     UnityEditor.TestRunner.dll:
     - UnityEditor.TestTools.TestRunner.TestListCacheData
@@ -60,6 +58,10 @@ ScriptsOnlyBuild:
       Script: {instanceID: 0}
     - Class: 81
       Script: {instanceID: 0}
+    - Class: 82
+      Script: {instanceID: 0}
+    - Class: 83
+      Script: {instanceID: 0}
     - Class: 91
       Script: {instanceID: 0}
     - Class: 95
@@ -81,13 +83,13 @@ ScriptsOnlyBuild:
     - Class: 114
       Script: {instanceID: 9514}
     - Class: 114
-      Script: {instanceID: 10368}
+      Script: {instanceID: 10370}
     - Class: 114
-      Script: {instanceID: 10530}
+      Script: {instanceID: 10532}
     - Class: 114
-      Script: {instanceID: 10568}
+      Script: {instanceID: 10570}
     - Class: 114
-      Script: {instanceID: 10744}
+      Script: {instanceID: 10746}
     - Class: 115
       Script: {instanceID: 0}
     - Class: 157
@@ -132,7 +134,7 @@ ScriptsOnlyBuild:
     - Class: 114
       Script: {instanceID: 9514}
     - Class: 114
-      Script: {instanceID: 16078}
+      Script: {instanceID: 10056}
     - Class: 115
       Script: {instanceID: 0}
     - Class: 157
@@ -207,6 +209,10 @@ ScriptsOnlyBuild:
       Script: {instanceID: 0}
     - Class: 81
       Script: {instanceID: 0}
+    - Class: 82
+      Script: {instanceID: 0}
+    - Class: 83
+      Script: {instanceID: 0}
     - Class: 91
       Script: {instanceID: 0}
     - Class: 95
@@ -234,17 +240,17 @@ ScriptsOnlyBuild:
     - Class: 114
       Script: {instanceID: 9962}
     - Class: 114
-      Script: {instanceID: 10368}
+      Script: {instanceID: 10370}
     - Class: 114
-      Script: {instanceID: 10382}
+      Script: {instanceID: 10384}
     - Class: 114
-      Script: {instanceID: 10568}
+      Script: {instanceID: 10570}
     - Class: 114
-      Script: {instanceID: 10592}
+      Script: {instanceID: 10594}
     - Class: 114
-      Script: {instanceID: 10744}
+      Script: {instanceID: 10746}
     - Class: 114
-      Script: {instanceID: 10968}
+      Script: {instanceID: 10970}
     - Class: 115
       Script: {instanceID: 0}
     - Class: 157
@@ -338,11 +344,11 @@ ScriptsOnlyBuild:
     - Class: 114
       Script: {instanceID: 9514}
     - Class: 114
-      Script: {instanceID: 10568}
+      Script: {instanceID: 10570}
     - Class: 114
-      Script: {instanceID: 10728}
+      Script: {instanceID: 10730}
     - Class: 114
-      Script: {instanceID: 10744}
+      Script: {instanceID: 10746}
     - Class: 115
       Script: {instanceID: 0}
     - Class: 157
@@ -382,6 +388,8 @@ ScriptsOnlyBuild:
       Script: {instanceID: 0}
     - Class: 81
       Script: {instanceID: 0}
+    - Class: 82
+      Script: {instanceID: 0}
     - Class: 83
       Script: {instanceID: 0}
     - Class: 91
@@ -419,19 +427,19 @@ ScriptsOnlyBuild:
     - Class: 114
       Script: {instanceID: 9932}
     - Class: 114
-      Script: {instanceID: 10358}
+      Script: {instanceID: 10360}
     - Class: 114
-      Script: {instanceID: 10368}
+      Script: {instanceID: 10370}
     - Class: 114
-      Script: {instanceID: 10390}
+      Script: {instanceID: 10392}
     - Class: 114
-      Script: {instanceID: 10568}
+      Script: {instanceID: 10570}
     - Class: 114
-      Script: {instanceID: 10584}
+      Script: {instanceID: 10586}
     - Class: 114
-      Script: {instanceID: 10682}
+      Script: {instanceID: 10684}
     - Class: 114
-      Script: {instanceID: 11012}
+      Script: {instanceID: 11014}
     - Class: 115
       Script: {instanceID: 0}
     - Class: 128
@@ -987,7 +995,7 @@ ScriptsOnlyBuild:
     className: ControlTrack
   - hash:
       serializedVersion: 2
-      Hash: a893d3320bfa4b8e0c33793cefb1acaa
+      Hash: bf572f54f24243136c91b9571e697ba3
     assemblyName: Assembly-CSharp.dll
     namespaceName: 
     className: GameScene
@@ -1195,6 +1203,12 @@ ScriptsOnlyBuild:
     assemblyName: Vuforia.UnityExtensions.dll
     namespaceName: Vuforia
     className: WireframeTrackableEventHandler
+  - hash:
+      serializedVersion: 2
+      Hash: b2dc1c8c03d63c8c709b39caa5517f56
+    assemblyName: Assembly-CSharp.dll
+    namespaceName: 
+    className: EndingScene
   - hash:
       serializedVersion: 2
       Hash: 265cf27ba050d55ff33a8acab4ded6c0
@@ -1479,7 +1493,7 @@ ScriptsOnlyBuild:
     className: NetworkStartPosition
   - hash:
       serializedVersion: 2
-      Hash: 16b0053350672bd75d8cfdce880f5074
+      Hash: afe439f583ab15a3cbbc9fd184081056
     assemblyName: Assembly-CSharp.dll
     namespaceName: 
     className: CharacterSelectionScene
@@ -2077,12 +2091,6 @@ ScriptsOnlyBuild:
     assemblyName: Unity.Timeline.dll
     namespaceName: UnityEngine.Timeline
     className: PlayableTrack
-  - hash:
-      serializedVersion: 2
-      Hash: b2dc1c8c03d63c8c709b39caa5517f56
-    assemblyName: Assembly-CSharp.dll
-    namespaceName: 
-    className: EndingScene
   platform: 13
   scenePathNames:
   - Assets/Scenes/MainMenu.unity

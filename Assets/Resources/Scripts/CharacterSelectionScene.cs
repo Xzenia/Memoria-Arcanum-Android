@@ -10,6 +10,8 @@ public class CharacterSelectionScene : MonoBehaviour
     public Player emily;
 
     public Animator transitionAnimator;
+
+    public AudioSource backgroundMusic;
     public void CharacterSelected()
     {
         if (EventSystem.current.currentSelectedGameObject.name.Equals("Shou"))
@@ -36,6 +38,9 @@ public class CharacterSelectionScene : MonoBehaviour
     IEnumerator LoadScene()
     {
         transitionAnimator.SetBool("SceneEnd", true);
+
+        backgroundMusic.Stop();
+
         yield return new WaitForSeconds(1.5f);
         SceneManager.LoadScene("GameScene");
     }
