@@ -25,6 +25,8 @@ public class Grid : MonoBehaviour
 
     public GameScene gameScene;
 
+    public GameObject ghostTile;
+
     private void Start()
     {
         selectedTiles = new List<GameObject>();
@@ -136,6 +138,8 @@ public class Grid : MonoBehaviour
     {
         if (GameScene.gameHasStarted)
         {
+            Vector2 touchPosition = new Vector2(0f,0f);
+
             if (EventSystem.current.currentSelectedGameObject.GetComponent<Image>().sprite.Equals(defaultSprite))
             {
                 EventSystem.current.currentSelectedGameObject.GetComponent<Image>().sprite = EventSystem.current.currentSelectedGameObject.GetComponent<Tile>().tile;
@@ -152,7 +156,6 @@ public class Grid : MonoBehaviour
                         Debug.Log("Tiles are similar!");
 
                         Tile tile = chosenTile1.GetComponent<Tile>();
-
                         if (tile.tileType == TileType.Item)
                         {
                             switch (tile.effectId)
@@ -179,6 +182,9 @@ public class Grid : MonoBehaviour
 
                             StartCoroutine(gameScene.ExecuteMove(move));
                         }
+
+                        CreateGhostTile(selectedTiles[0]);
+                        CreateGhostTile(selectedTiles[1]);
 
                         gameScene.correctMatch.Play();
 
@@ -207,5 +213,14 @@ public class Grid : MonoBehaviour
 
         chosenTile1.GetComponent<Image>().sprite = defaultSprite;
         chosenTile2.GetComponent<Image>().sprite = defaultSprite;
+    }
+
+    private void CreateGhostTile(GameObject tile)
+    {
+        GameObject ghostTileCopy = Instantiate(ghostTile, tile.transform.position, Quaternion.identity);
+        ghostTileCopy.GetComponent<GhostTile>().destroyable = true;
+        ghostTileCopy.GetComponent<Image>().sprite = tile.GetComponent<Tile>().tile;
+        ghostTileCopy.GetComponent<GhostTile>().tileY = tile.transform.position.y;
+        ghostTileCopy.transform.SetParent(this.gameObject.transform);
     }
 }

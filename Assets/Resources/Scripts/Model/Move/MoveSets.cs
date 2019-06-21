@@ -117,12 +117,12 @@ public static class MoveSets
 
     public static Move RetrieveMove(Tile tile)
     {
-        if (tile.character == Characters.Shou)
+        if (tile.character == Characters.Emily)
         {
             switch (tile.effectId)
             {
                 case 1:
-                    return cleave;
+                    return arrowRain;
                 case 2:
                     return frostShot;
                 case 3:
@@ -134,12 +134,12 @@ public static class MoveSets
                     return cleave;
             }
         }
-        else if (tile.character == Characters.Emily)
+        else if (tile.character == Characters.Shou)
         {
             switch (tile.effectId)
             {
                 case 1:
-                    return arrowRain;
+                    return cleave;
                 case 2:
                     return lightningSlash;
                 case 3:

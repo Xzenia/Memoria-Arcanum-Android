@@ -73,9 +73,11 @@
     <Compile Include="Assets\Resources\Scripts\MainMenuScene.cs" />
     <Compile Include="Assets\Resources\Scripts\Model\Enemy.cs" />
     <Compile Include="Assets\Resources\Scripts\Model\Entity.cs" />
+    <Compile Include="Assets\Resources\Scripts\Model\GhostTile.cs" />
     <Compile Include="Assets\Resources\Scripts\Model\Move\Move.cs" />
     <Compile Include="Assets\Resources\Scripts\Model\Move\MoveSets.cs" />
     <Compile Include="Assets\Resources\Scripts\Model\Player.cs" />
+    <Compile Include="Assets\Resources\Scripts\Model\Projectile.cs" />
     <Compile Include="Assets\Resources\Scripts\Model\Tile.cs" />
     <None Include="Assets\TextMesh Pro\Resources\Shaders\TMP_SDF-Surface-Mobile.shader" />
     <None Include="Assets\TextMesh Pro\Resources\LineBreaking Leading Characters.txt" />
