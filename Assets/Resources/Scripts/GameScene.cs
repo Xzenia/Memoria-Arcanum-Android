@@ -62,6 +62,8 @@ public class GameScene : MonoBehaviour
     public AudioSource normalAttack;
     public AudioSource enemyAttack;
 
+    private bool demoMode = true;
+    
     void Start()
     {
         matches = 0;
@@ -242,7 +244,22 @@ public class GameScene : MonoBehaviour
             yield return new WaitForSeconds((float)1.5);
 
             enemyEncounterList.RemoveAt(0);
-            LoadNewEnemy();
+
+            if (enemyEncounterList.Count <= 0)
+            {
+                if (demoMode)
+                {
+                    SceneManager.LoadScene("DemoComplete");
+                }
+                else
+                {
+                    SceneManager.LoadScene("LevelComplete");
+                }
+            }
+            else
+            {
+                LoadNewEnemy();
+            }
 
             enemyHasDied = false;
         }

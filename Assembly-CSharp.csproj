@@ -63,6 +63,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets\Resources\Scripts\CharacterSelectionScene.cs" />
+    <Compile Include="Assets\Resources\Scripts\DemoCompleteScene.cs" />
     <Compile Include="Assets\Resources\Scripts\EndingScene.cs" />
     <Compile Include="Assets\Resources\Scripts\Extensions.cs" />
     <Compile Include="Assets\Resources\Scripts\GameOverScene.cs" />

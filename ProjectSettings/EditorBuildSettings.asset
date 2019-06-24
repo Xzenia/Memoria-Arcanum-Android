@@ -29,4 +29,7 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/EndingScene.unity
     guid: 3bc26780afa04eb4193335e0f8f09bd5
+  - enabled: 1
+    path: Assets/Scenes/DemoComplete.unity
+    guid: afe860e88e3159449b3495a4d443d120
   m_configObjects: {}

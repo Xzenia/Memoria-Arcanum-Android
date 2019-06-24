@@ -2,10 +2,12 @@ ScriptsOnlyBuild:
   usedScripts:
     Assembly-CSharp.dll:
     - CharacterSelectionScene
+    - DemoCompleteScene
     - EndingScene
     - Enemy
     - GameOverScene
     - GameScene
+    - GhostTile
     - Grid
     - IntroductionCutscene
     - LevelCompleteScene
@@ -21,8 +23,10 @@ ScriptsOnlyBuild:
     UnityEditor.Graphs.dll:
     - UnityEditor.Graphs.AnimationBlendTree.Graph
     - UnityEditor.Graphs.AnimationBlendTree.GraphGUI
+    - UnityEditor.Graphs.AnimationStateMachine.AnyStateNode
     - UnityEditor.Graphs.AnimationStateMachine.Graph
     - UnityEditor.Graphs.AnimationStateMachine.GraphGUI
+    - UnityEditor.Graphs.AnimationStateMachine.StateNode
     - UnityEditor.Graphs.AnimatorControllerTool
     UnityEditor.TestRunner.dll:
     - UnityEditor.TestTools.TestRunner.TestListCacheData
@@ -85,11 +89,64 @@ ScriptsOnlyBuild:
     - Class: 114
       Script: {instanceID: 10370}
     - Class: 114
-      Script: {instanceID: 10532}
+      Script: {instanceID: 10534}
     - Class: 114
-      Script: {instanceID: 10570}
+      Script: {instanceID: 10572}
     - Class: 114
-      Script: {instanceID: 10746}
+      Script: {instanceID: 10748}
+    - Class: 115
+      Script: {instanceID: 0}
+    - Class: 157
+      Script: {instanceID: 0}
+    - Class: 213
+      Script: {instanceID: 0}
+    - Class: 222
+      Script: {instanceID: 0}
+    - Class: 223
+      Script: {instanceID: 0}
+    - Class: 224
+      Script: {instanceID: 0}
+    Assets/Scenes/DemoComplete.unity:
+    - Class: 1
+      Script: {instanceID: 0}
+    - Class: 4
+      Script: {instanceID: 0}
+    - Class: 20
+      Script: {instanceID: 0}
+    - Class: 21
+      Script: {instanceID: 0}
+    - Class: 28
+      Script: {instanceID: 0}
+    - Class: 48
+      Script: {instanceID: 0}
+    - Class: 74
+      Script: {instanceID: 0}
+    - Class: 81
+      Script: {instanceID: 0}
+    - Class: 91
+      Script: {instanceID: 0}
+    - Class: 95
+      Script: {instanceID: 0}
+    - Class: 104
+      Script: {instanceID: 0}
+    - Class: 114
+      Script: {instanceID: 9456}
+    - Class: 114
+      Script: {instanceID: 9458}
+    - Class: 114
+      Script: {instanceID: 9464}
+    - Class: 114
+      Script: {instanceID: 9470}
+    - Class: 114
+      Script: {instanceID: 9478}
+    - Class: 114
+      Script: {instanceID: 9514}
+    - Class: 114
+      Script: {instanceID: 10572}
+    - Class: 114
+      Script: {instanceID: 10748}
+    - Class: 114
+      Script: {instanceID: 16836}
     - Class: 115
       Script: {instanceID: 0}
     - Class: 157
@@ -244,13 +301,15 @@ ScriptsOnlyBuild:
     - Class: 114
       Script: {instanceID: 10384}
     - Class: 114
-      Script: {instanceID: 10570}
+      Script: {instanceID: 10572}
     - Class: 114
-      Script: {instanceID: 10594}
+      Script: {instanceID: 10596}
     - Class: 114
-      Script: {instanceID: 10746}
+      Script: {instanceID: 10748}
     - Class: 114
-      Script: {instanceID: 10970}
+      Script: {instanceID: 10972}
+    - Class: 114
+      Script: {instanceID: 11252}
     - Class: 115
       Script: {instanceID: 0}
     - Class: 157
@@ -344,11 +403,11 @@ ScriptsOnlyBuild:
     - Class: 114
       Script: {instanceID: 9514}
     - Class: 114
-      Script: {instanceID: 10570}
+      Script: {instanceID: 10572}
     - Class: 114
-      Script: {instanceID: 10730}
+      Script: {instanceID: 10732}
     - Class: 114
-      Script: {instanceID: 10746}
+      Script: {instanceID: 10748}
     - Class: 115
       Script: {instanceID: 0}
     - Class: 157
@@ -433,13 +492,13 @@ ScriptsOnlyBuild:
     - Class: 114
       Script: {instanceID: 10392}
     - Class: 114
-      Script: {instanceID: 10570}
+      Script: {instanceID: 10572}
     - Class: 114
-      Script: {instanceID: 10586}
+      Script: {instanceID: 10588}
     - Class: 114
-      Script: {instanceID: 10684}
+      Script: {instanceID: 10686}
     - Class: 114
-      Script: {instanceID: 11014}
+      Script: {instanceID: 11016}
     - Class: 115
       Script: {instanceID: 0}
     - Class: 128
@@ -1475,7 +1534,7 @@ ScriptsOnlyBuild:
     className: Player
   - hash:
       serializedVersion: 2
-      Hash: 742ecc6124ac88bd6e9f94efd9e087df
+      Hash: 4de9fd2f4436973911f47004962dda0c
     assemblyName: Assembly-CSharp.dll
     namespaceName: 
     className: Grid
@@ -1491,6 +1550,12 @@ ScriptsOnlyBuild:
     assemblyName: com.unity.multiplayer-hlapi.Runtime.dll
     namespaceName: UnityEngine.Networking
     className: NetworkStartPosition
+  - hash:
+      serializedVersion: 2
+      Hash: 71bb6a6b6c8f052f948db64c7dd3ca4f
+    assemblyName: Assembly-CSharp.dll
+    namespaceName: 
+    className: Projectile
   - hash:
       serializedVersion: 2
       Hash: afe439f583ab15a3cbbc9fd184081056
@@ -1877,6 +1942,12 @@ ScriptsOnlyBuild:
     className: WireframeTrackableEventHandler
   - hash:
       serializedVersion: 2
+      Hash: d911b181ff03f0c1315737468c0af354
+    assemblyName: Assembly-CSharp.dll
+    namespaceName: 
+    className: GhostTile
+  - hash:
+      serializedVersion: 2
       Hash: 8220b46879dc5e37db1b940c938f5744
     assemblyName: Unity.Timeline.dll
     namespaceName: UnityEngine.Timeline
@@ -2091,6 +2162,12 @@ ScriptsOnlyBuild:
     assemblyName: Unity.Timeline.dll
     namespaceName: UnityEngine.Timeline
     className: PlayableTrack
+  - hash:
+      serializedVersion: 2
+      Hash: d8c9c3ac884b83482855d9dcef4ff242
+    assemblyName: Assembly-CSharp.dll
+    namespaceName: 
+    className: DemoCompleteScene
   platform: 13
   scenePathNames:
   - Assets/Scenes/MainMenu.unity
@@ -2100,4 +2177,5 @@ ScriptsOnlyBuild:
   - Assets/Scenes/GameOver.unity
   - Assets/Scenes/LevelComplete.unity
   - Assets/Scenes/EndingScene.unity
+  - Assets/Scenes/DemoComplete.unity
   playerPath: C:/Users/MiTRiX/Desktop/Memoria Arcanum.apk
