@@ -62,6 +62,8 @@ public class GameScene : MonoBehaviour
     public AudioSource normalAttack;
     public AudioSource enemyAttack;
 
+    public Animator gridBackground;
+
     private bool demoMode = true;
     
     void Start()
@@ -218,6 +220,15 @@ public class GameScene : MonoBehaviour
             playerHealthBarAmount.transform.localScale = new Vector3((0 / player.maxHealth), playerHealthBarAmount.transform.localScale.y, playerHealthBarAmount.transform.localScale.z);
         }
 
+        if (player.health <= 15)
+        {
+            gridBackground.SetBool("Player Health Critical", true);
+        }
+        else
+        {
+            gridBackground.SetBool("Player Health Critical", false);
+        }
+
         if (currentEnemyObject.GetComponent<Enemy>().health > 0)
         {
             var enemy = currentEnemyObject.GetComponent<Enemy>();
@@ -281,7 +292,10 @@ public class GameScene : MonoBehaviour
 
         enemyAttack.Play();
 
+        gridBackground.SetTrigger("Player Hit");
+
         int damage = (int)(enemy.attackStat - (enemy.attackStat * (player.defenseStat / 100)));
+
         player.DecreaseHealth(damage);
 
         if (player.health <= 0)
