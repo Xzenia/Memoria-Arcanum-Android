@@ -70,7 +70,9 @@
     <Compile Include="Assets\Resources\Scripts\GameScene.cs" />
     <Compile Include="Assets\Resources\Scripts\Grid.cs" />
     <Compile Include="Assets\Resources\Scripts\IntroductionCutscene.cs" />
+    <Compile Include="Assets\Resources\Scripts\LevelBackgrounds.cs" />
     <Compile Include="Assets\Resources\Scripts\LevelCompleteScene.cs" />
+    <Compile Include="Assets\Resources\Scripts\LoadingScreen.cs" />
     <Compile Include="Assets\Resources\Scripts\MainMenuScene.cs" />
     <Compile Include="Assets\Resources\Scripts\Model\Enemy.cs" />
     <Compile Include="Assets\Resources\Scripts\Model\Entity.cs" />
@@ -80,6 +82,7 @@
     <Compile Include="Assets\Resources\Scripts\Model\Player.cs" />
     <Compile Include="Assets\Resources\Scripts\Model\Projectile.cs" />
     <Compile Include="Assets\Resources\Scripts\Model\Tile.cs" />
+    <Compile Include="Assets\Resources\Scripts\Sounds.cs" />
     <None Include="Assets\TextMesh Pro\Resources\Shaders\TMP_SDF-Surface-Mobile.shader" />
     <None Include="Assets\TextMesh Pro\Resources\LineBreaking Leading Characters.txt" />
     <None Include="Assets\TextMesh Pro\Resources\Shaders\TMPro_Properties.cginc" />

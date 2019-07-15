@@ -41,7 +41,8 @@ public class CharacterSelectionScene : MonoBehaviour
 
         backgroundMusic.Stop();
 
-        yield return new WaitForSeconds(1.5f);
-        SceneManager.LoadScene("GameScene");
+        yield return new WaitForSeconds(1f);
+
+        SceneManager.LoadScene("LoadingScreen");
     }
 }

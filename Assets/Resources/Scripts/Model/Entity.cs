@@ -14,19 +14,31 @@ public class Entity : MonoBehaviour
     public float baseAttackStat;
     [Tooltip("DefenseStat bases its value on this one.")]
     public float baseDefenseStat;
-    [Tooltip("AttackStat has the same initial value as BaseAttackStat")]
+    [HideInInspector]
     public float attackStat;
-    [Tooltip("DefenseStat has the same initial value as BaseDefenseStat")]
+    [HideInInspector]
     public float defenseStat;
+
+    void Start()
+    {
+        attackStat = baseAttackStat;
+        defenseStat = baseDefenseStat;
+    }
 
     public void IncreaseHealth(int increase)
     {
-        health += increase;
+        if (health < maxHealth)
+        {
+            health += increase;
+        }
     }
 
     public void DecreaseHealth(int decrease)
     {
-        health -= decrease;
+        if (health > 0)
+        {
+            health -= decrease;
+        }
     }
 
     public void IncreaseAttackStat(int increase)

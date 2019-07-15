@@ -4,9 +4,9 @@ using UnityEngine;
 
 public class Move
 {
-    public int id;
     public string name;
     public string description;
-    public float attack;
-    public float defense;
+    public float attack = 0;
+    public float defense = 0;
+    public float health = 0;
 }

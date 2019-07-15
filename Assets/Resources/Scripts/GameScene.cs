@@ -1,6 +1,5 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
@@ -12,7 +11,7 @@ public class GameScene : MonoBehaviour
     public static int potionCount;
     public static bool healthPotionActivated;
 
-    public static float time; //Added timer variables
+    public static float time; 
     public static float maxTime;
     public static float timeDecrementValue;
 
@@ -45,49 +44,51 @@ public class GameScene : MonoBehaviour
 
     private static GameObject currentEnemyObject;
 
-    public static bool gameHasStarted;
+    public static bool playerTurnHasStarted;
 
     public static bool enemyHasDied;
 
     public static bool playerHasDied;
 
-    public static int level;
-
     public GameObject memorizePopup;
-
-    public AudioSource backgroundMusic;
-    public AudioSource wrongMatch;
-    public AudioSource correctMatch;
-    public AudioSource spellAttack;
-    public AudioSource normalAttack;
-    public AudioSource enemyAttack;
 
     public Animator gridBackground;
 
-    private bool demoMode = true;
-    
+    private bool demoMode = false;
+
+    public Image chargeBarAmount;
+
+    public Animator chargeBarAnimation;
+
+    public Sounds sounds;
+
+    public static int gridResetCount;
+
+    public Animator enemyAttackAnimation;
+
+    public GameObject tapEffect;
+
+    public static bool specialAttackModeActivated;
+
+    void Awake()
+    {
+        PlayerPrefs.DeleteKey("level");
+        if (!PlayerPrefs.HasKey("level"))
+        {
+            PlayerPrefs.SetInt("level", 1);
+        }
+    }
+
     void Start()
     {
-        matches = 0;
-        potionCount = 3;
-        gameHasStarted = false;
-        enemyHasDied = false;
-        playerHasDied = false;
-
-        enemies = GameObject.FindGameObjectsWithTag("Enemy");
-
-        maxTime = 100f;
-        time = maxTime;
-        timeDecrementValue = 0.1f;
-
-        healthPotionActivated = false;
-        pairedTiles = new List<Tile>();
+        InitializeValues();
 
         if (player == null)
         {
-            Debug.LogError("Start(): player is null! Defaulting to Shou.");
+            Debug.LogError("Start(): player variable is null! Defaulting to Shou.");
             player = shou.GetComponent<Player>();
         }
+        player.ResetPlayerValues();
 
         SetupGameBoard();
 
@@ -115,59 +116,64 @@ public class GameScene : MonoBehaviour
             playerSprite.GetComponent<Animator>().runtimeAnimatorController = shou.GetComponent<Animator>().runtimeAnimatorController;
         }
 
-        enemyEncounterList = SetupEnemyList(enemies);
+        enemyEncounterList = Enemy.SetupEnemyList(enemies);
         LoadNewEnemy();
     }
 
-    public List<GameObject> SetupEnemyList(GameObject[] enemies)
+
+    private void InitializeValues()
     {
-        List<GameObject> enemyList = new List<GameObject>(enemies);
-        List<GameObject> finalEnemyList = new List<GameObject>();
+        matches = 0;
+        potionCount = 3;
+        playerTurnHasStarted = false;
+        enemyHasDied = false;
+        playerHasDied = false;
 
-        if (enemyList.Count > 0)
-        {
-            enemyList = Extensions.Shuffle(enemyList);
+        enemies = GameObject.FindGameObjectsWithTag("Enemy");
 
-            int numberOfEnemies = Random.Range(3, enemyList.Count - 1);
+        maxTime = 100f;
+        time = maxTime;
+        timeDecrementValue = 0.1f;
 
-            for (int counter = 0; counter < numberOfEnemies; counter++)
-            {
-                finalEnemyList.Add(enemyList[counter]);
-            }
-        }
-        else
-        {
-            Debug.LogError("SetupEnemyList(): enemyList is empty!");
-        }
+        healthPotionActivated = false;
+        pairedTiles = new List<Tile>();
 
-        finalEnemyList = Extensions.SortEnemies(finalEnemyList);
-        return finalEnemyList;
+        gridResetCount = 0;
+
+        specialAttackModeActivated = false;
     }
 
     public void PotionButtonClicked()
     {
-        if (potionCount > 0 && !healthPotionActivated)
+        //Prevents the button from activating twice (!healthPotionActivated) and in a time when it would be
+        //unlikely to make a pair (time > 3). 
+        if (potionCount > 0 && !healthPotionActivated && time > 3)
         {
             potionCount--;
             healthPotionActivated = true;
+
+            playerTurnHasStarted = false;
+
+            SetupGameBoard();
         }
     }
 
     public IEnumerator ExecuteMove(Move move)
     {
-        playerSprite.GetComponent<Animator>().SetTrigger("IsAttacking");
-        yield return new WaitForSeconds(1);
-
-        StartCoroutine(ShowDamageCounter(enemyDamageCounter, move.attack));
-
-        if (player.name.Equals("Rikko"))
+        if (specialAttackModeActivated)
         {
-            spellAttack.Play();
+            playerSprite.GetComponent<Animator>().SetTrigger("SpecialAttack");
         }
         else
         {
-            normalAttack.Play();
+            playerSprite.GetComponent<Animator>().SetTrigger("IsAttacking");
         }
+
+        yield return new WaitForSeconds(0.5f);
+
+        StartCoroutine(ShowDamageCounter(enemyDamageCounter, move.attack));
+
+        sounds.PlayHeroAttackSound(player);
 
         int damage = (int)(player.attackStat - (player.attackStat * (currentEnemyObject.GetComponent<Enemy>().defenseStat / 100)));
         currentEnemyObject.GetComponent<Enemy>().DecreaseHealth(damage);
@@ -178,68 +184,108 @@ public class GameScene : MonoBehaviour
         matchCounter.GetComponent<TMPro.TextMeshProUGUI>().text = matches.ToString();
         potionCounter.GetComponent<TMPro.TextMeshProUGUI>().text = potionCount.ToString();
 
-        if (gameHasStarted)
+        if (playerTurnHasStarted)
         {
-            enemyTurnIndicator.SetActive(false);
-            memorizePopup.SetActive(false);
-            if (time >= 0 && !enemyHasDied)
+            if (time <= 0 || enemyHasDied)
             {
-                playerTurnIndicator.SetActive(true);
+                if (!healthPotionActivated)
+                { 
+                    StartCoroutine(PlayerTurnHasEnded());
+                }
 
-                time -= timeDecrementValue;
-                timeAmount.transform.localScale = new Vector3(time / maxTime, timeAmount.transform.localScale.y, timeAmount.transform.localScale.z);
+                playerTurnHasStarted = false;
+
+                if (specialAttackModeActivated)
+                {
+                    specialAttackModeActivated = false;
+                }
             }
             else
             {
-                time = maxTime;
+                time -= timeDecrementValue;
                 timeAmount.transform.localScale = new Vector3(time / maxTime, timeAmount.transform.localScale.y, timeAmount.transform.localScale.z);
-
-                StartCoroutine(PlayerTurnHasEnded());
-
-                gameHasStarted = false;
             }
+        }
+        else
+        {
+            time = maxTime;
+            timeAmount.transform.localScale = new Vector3(time / maxTime, timeAmount.transform.localScale.y, timeAmount.transform.localScale.z);
+        }
+
+        //Popups
+        if (playerTurnHasStarted)
+        {
+            enemyTurnIndicator.SetActive(false);
+            memorizePopup.SetActive(false);
+
+            playerTurnIndicator.SetActive(true);
         }
         else
         {
             memorizePopup.SetActive(true);
         }
+    }
 
-        if (player.health > 0)
+    void FixedUpdate()
+    {
+        //Player health bar
+        //Value correction measures. 
+        if (player.health > player.maxHealth)
         {
-            if (player.health > player.maxHealth)
-            {
-                playerHealthBarAmount.transform.localScale = new Vector3((player.maxHealth / player.maxHealth), playerHealthBarAmount.transform.localScale.y, playerHealthBarAmount.transform.localScale.z);
-            }
-            else
-            {
-                playerHealthBarAmount.transform.localScale = new Vector3((player.health / player.maxHealth), playerHealthBarAmount.transform.localScale.y, playerHealthBarAmount.transform.localScale.z);
-            }
+            player.health = player.maxHealth;
         }
-        else if (player.health <= 0)
+        else if (player.health < 0)
         {
-            playerHealthBarAmount.transform.localScale = new Vector3((0 / player.maxHealth), playerHealthBarAmount.transform.localScale.y, playerHealthBarAmount.transform.localScale.z);
+            player.health = 0;
         }
+
+        playerHealthBarAmount.transform.localScale = new Vector3((player.health / player.maxHealth), playerHealthBarAmount.transform.localScale.y, playerHealthBarAmount.transform.localScale.z);
 
         if (player.health <= 15)
         {
+            sounds.critical.Play();
+
             gridBackground.SetBool("Player Health Critical", true);
         }
         else
         {
+            sounds.critical.Stop();
+
             gridBackground.SetBool("Player Health Critical", false);
         }
 
-        if (currentEnemyObject.GetComponent<Enemy>().health > 0)
+        //Enemy health bar 
+        var enemy = currentEnemyObject.GetComponent<Enemy>();
+
+        //Value correction measures. 
+        if (enemy.health > enemy.maxHealth)
         {
-            var enemy = currentEnemyObject.GetComponent<Enemy>();
-            enemyHealthBarAmount.transform.localScale = new Vector3(enemy.health / enemy.maxHealth, enemyHealthBarAmount.transform.localScale.y, enemyHealthBarAmount.transform.localScale.z);
+            enemy.health = enemy.maxHealth;
+        }
+
+        if (enemy.health <= 0)
+        {
+            enemy.health = 0;
+
+            enemyHasDied = true;
+        }
+
+        enemyHealthBarAmount.transform.localScale = new Vector3(enemy.health / enemy.maxHealth, enemyHealthBarAmount.transform.localScale.y, enemyHealthBarAmount.transform.localScale.z);
+
+        //Player charge bar
+        chargeBarAmount.transform.localScale = new Vector3(chargeBarAmount.transform.localScale.x, (player.charge / player.maxCharge), chargeBarAmount.transform.localScale.z);
+
+        if (player.charge == player.maxCharge)
+        {
+            //sounds.chargeFull.Play();
+
+            chargeBarAnimation.SetBool("IsFull", true);
         }
         else
         {
-            var enemy = currentEnemyObject.GetComponent<Enemy>();
-            enemyHealthBarAmount.transform.localScale = new Vector3(0 / enemy.maxHealth, enemyHealthBarAmount.transform.localScale.y, enemyHealthBarAmount.transform.localScale.z);
+            //sounds.chargeFull.Stop();
 
-            enemyHasDied = true;
+            chargeBarAnimation.SetBool("IsFull", false);
         }
     }
 
@@ -247,12 +293,12 @@ public class GameScene : MonoBehaviour
     {
         playerTurnIndicator.SetActive(false);
 
-        yield return new WaitForSeconds((float)0.5);
+        yield return new WaitForSeconds(0.5f);
 
         if (enemyHasDied)
         {
             enemySprite.GetComponent<Animator>().SetBool("IsDead", true);
-            yield return new WaitForSeconds((float)1.5);
+            yield return new WaitForSeconds(1.5f);
 
             enemyEncounterList.RemoveAt(0);
 
@@ -279,6 +325,10 @@ public class GameScene : MonoBehaviour
             BeginEnemyTurn();
         }
 
+        grid.GetComponent<Grid>().HideTileBoardContents();
+
+        yield return new WaitForSeconds(2f);
+
         SetupGameBoard();
     }
 
@@ -288,9 +338,29 @@ public class GameScene : MonoBehaviour
 
         enemyTurnIndicator.SetActive(true);
 
+        switch (enemy.attackType)
+        {
+            case AttackType.Teeth:
+                enemyAttackAnimation.SetTrigger("Bite");
+                break;
+            case AttackType.Claws:
+                enemyAttackAnimation.SetTrigger("Scratch");
+                break;
+            case AttackType.Crystal:
+                enemyAttackAnimation.SetTrigger("Crystal");
+                break;
+            case AttackType.Projectile:
+                enemyAttackAnimation.SetTrigger("Projectile");
+                break;
+            default:
+                Debug.LogError("BeginEnemyTurn(): AttackType switch case defaulted! Switching to teeth...");
+                enemyAttackAnimation.SetTrigger("Teeth");
+                break;
+        }
+
         StartCoroutine(ShowDamageCounter(playerDamageCounter, (int)enemy.attackStat));
 
-        enemyAttack.Play();
+        sounds.PlayEnemyAttackSound();
 
         gridBackground.SetTrigger("Player Hit");
 
@@ -309,22 +379,48 @@ public class GameScene : MonoBehaviour
         damageCounter.GetComponent<TMPro.TextMeshProUGUI>().text = ""+(int)damage;
         damageCounter.SetActive(true);
 
-        yield return new WaitForSeconds((float)1);
+        yield return new WaitForSeconds(1f);
 
         damageCounter.SetActive(false);
     }
 
     private void SetupGameBoard()
     {
-        List<Tile> tileList = grid.GetComponent<Grid>().GenerateTile();
+        List <Tile> tileList = grid.GetComponent<Grid>().GenerateTile();
         grid.GetComponent<Grid>().FillTileBoard(tileList);
-        grid.GetComponent<Grid>().ShowTileBoardContents();
+        grid.GetComponent<Grid>().StartCoroutine(grid.GetComponent<Grid>().ShowAndHideTileContents());
+
+        if (!healthPotionActivated)
+        {
+            gridResetCount++;
+        }
     }
 
     private void LoadNewEnemy()
     {
         currentEnemyObject = enemyEncounterList[0];
         enemySprite.GetComponent<Image>().sprite = currentEnemyObject.GetComponent<Image>().sprite;
+
+        var currentEnemyObjectRectTransform = currentEnemyObject.transform as RectTransform;
+        var enemySpriteRectTransform = enemySprite.transform as RectTransform;
+
+        float currentEnemyObjectHeight = currentEnemyObjectRectTransform.rect.height;
+        float currentEnemyObjectWidth = currentEnemyObjectRectTransform.rect.width;
+
+        enemySpriteRectTransform.sizeDelta = new Vector2(currentEnemyObjectWidth, currentEnemyObjectHeight);
+
         enemySprite.GetComponent<Animator>().runtimeAnimatorController = currentEnemyObject.GetComponent<Animator>().runtimeAnimatorController;
+    }
+
+    public void SpecialAttackButtonClicked()
+    {
+        if (player.charge >= player.maxCharge && playerTurnHasStarted)
+        {
+            specialAttackModeActivated = true;
+            playerTurnHasStarted = false;
+            SetupGameBoard();
+
+            player.RevertToDefaultChargeValue();
+        }
     }
 }

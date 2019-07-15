@@ -11,6 +11,10 @@ public class Grid : MonoBehaviour
     public GameObject[] rikkoTiles;
     public GameObject[] emilyTiles;
 
+    public GameObject shouSpecialAttackTile;
+    public GameObject rikkoSpecialAttackTile;
+    public GameObject emilySpecialAttackTile;
+
     public GameObject[] healingTiles;
 
     public GameObject[] gameTiles;
@@ -25,25 +29,53 @@ public class Grid : MonoBehaviour
 
     public GameScene gameScene;
 
+    public Sounds sounds;
+
     public GameObject ghostTile;
 
-    private void Start()
+    void Start()
     {
         selectedTiles = new List<GameObject>();
     }
+
     public List<Tile> GenerateTile()
     {
         if (GameScene.player.name.Equals("Shou"))
         {
-            characterTiles = new List<GameObject>(shouTiles);
+            if (GameScene.specialAttackModeActivated)
+            {
+                characterTiles = new List<GameObject>();
+                characterTiles.Add(shouSpecialAttackTile);
+            }
+            else
+            {
+                characterTiles = new List<GameObject>(shouTiles);
+            }
+
         }
         else if (GameScene.player.name.Equals("Rikko"))
         {
-            characterTiles = new List<GameObject>(rikkoTiles);
+            if (GameScene.specialAttackModeActivated)
+            {
+                characterTiles = new List<GameObject>();
+                characterTiles.Add(rikkoSpecialAttackTile);
+            }
+            else
+            {
+                characterTiles = new List<GameObject>(rikkoTiles);
+            }
         }
         else if (GameScene.player.name.Equals("Emily"))
         {
-            characterTiles = new List<GameObject>(emilyTiles);
+            if (GameScene.specialAttackModeActivated)
+            {
+                characterTiles = new List<GameObject>();
+                characterTiles.Add(emilySpecialAttackTile);
+            }
+            else
+            {
+                characterTiles = new List<GameObject>(emilyTiles);
+            }
         }
         else
         {
@@ -57,31 +89,50 @@ public class Grid : MonoBehaviour
             tileList.Add(gameObject.GetComponent<Tile>());
         }
 
-        List<Tile> tiles = new List<Tile>();
         if (GameScene.healthPotionActivated)
         {
+            sounds.healUp.Play();
+
             int randomIndex = Random.Range(0, healingTiles.Length);
             for (int counter = 0; counter < 4; counter++)
             {
                 tileList.Add(healingTiles[randomIndex].GetComponent<Tile>());
             }
-
-            GameScene.healthPotionActivated = false;
         }
 
-        if (Random.Range(0, 100) > 25)
+        //TODO: Rewrite tile generation code into something much simpler.
+        int timesPotionTileHasBeenSpawned = 0;
+
+        List<Tile> tiles = new List<Tile>();
+        for (int counter = 0; counter < 13; counter++)
         {
-            for (int counter = 0; counter < 2; counter++)
+            int randomIndex = Random.Range(0, tileList.Count);
+
+            if (Random.Range(0, 100) <= 25 && !GameScene.healthPotionActivated)
             {
-                tileList.Add(potionTile.GetComponent<Tile>());
+                if (timesPotionTileHasBeenSpawned < 2)
+                {
+                    tiles.Add(potionTile.GetComponent<Tile>());
+                    tiles.Add(potionTile.GetComponent<Tile>());
+
+                    timesPotionTileHasBeenSpawned++;
+                }
+                else
+                {
+                    tiles.Add(tileList[randomIndex]);
+                    tiles.Add(tileList[randomIndex]);
+                }
+            }
+            else
+            {
+                tiles.Add(tileList[randomIndex]);
+                tiles.Add(tileList[randomIndex]);
             }
         }
 
-        for (int counter = 0; counter < 25; counter++)
-        {
-            int randomIndex = Random.Range(0, tileList.Count);
-            tiles.Add(tileList[randomIndex]);
-        }
+        Extensions.ShuffleTiles(tiles);
+
+        GameScene.healthPotionActivated = false;
 
         return tiles;
     }
@@ -97,6 +148,18 @@ public class Grid : MonoBehaviour
             gameTiles[counter].GetComponent<Tile>().effectId = tile[counter].effectId;
         }
     }
+    public IEnumerator ShowAndHideTileContents()
+    {
+        ShowTileBoardContents();
+
+        yield return new WaitForSeconds(5);
+
+        HideTileBoardContents();
+
+        GameScene.playerTurnHasStarted = true;
+
+        yield return new WaitForSeconds(1);
+    }
 
     public void ShowTileBoardContents()
     {
@@ -104,27 +167,20 @@ public class Grid : MonoBehaviour
         {
             gameObject.GetComponent<Image>().sprite = gameObject.GetComponent<Tile>().tile;
         }
-        StartCoroutine(HideTileContents());
     }
 
-    IEnumerator HideTileContents()
+    public void HideTileBoardContents()
     {
-        yield return new WaitForSeconds(5);
-
         foreach (GameObject gameObject in gameTiles)
         {
             gameObject.GetComponent<Image>().sprite = defaultSprite;
         }
-
-        GameScene.gameHasStarted = true;
-
-        yield return new WaitForSeconds(1);
     }
 
     private GameObject chosenTile1;
     private GameObject chosenTile2;
 
-    private void Update()
+    void FixedUpdate()
     {
         if (flipXValue < 1 && EventSystem.current.currentSelectedGameObject != null)
         {
@@ -132,18 +188,22 @@ public class Grid : MonoBehaviour
             flipXValue += 0.2f;
             tileToFlip.transform.localScale = new Vector3(flipXValue, tileToFlip.transform.localScale.y, tileToFlip.transform.localScale.z);
         }
+
+        if (!GameScene.playerTurnHasStarted)
+        {
+            selectedTiles.Clear();
+        }
     }
 
     public void TileIsClicked()
     {
-        if (GameScene.gameHasStarted)
+        if (GameScene.playerTurnHasStarted)
         {
-            Vector2 touchPosition = new Vector2(0f,0f);
-
             if (EventSystem.current.currentSelectedGameObject.GetComponent<Image>().sprite.Equals(defaultSprite))
             {
                 EventSystem.current.currentSelectedGameObject.GetComponent<Image>().sprite = EventSystem.current.currentSelectedGameObject.GetComponent<Tile>().tile;
                 flipXValue = 0.2f; //Flip card.
+
                 selectedTiles.Add(EventSystem.current.currentSelectedGameObject);
 
                 if (selectedTiles.Count > 1)
@@ -179,31 +239,33 @@ public class Grid : MonoBehaviour
                         {
                             Move move = MoveSets.RetrieveMove(tile);
                             Debug.Log("Selected Tile: " + move.name + "\nDamage: " + move.attack);
+                            
+                            if (GameScene.player.charge < GameScene.player.maxCharge && !GameScene.specialAttackModeActivated)
+                            {
+                                GameScene.player.IncreaseCharge(10);
+                            }
 
                             StartCoroutine(gameScene.ExecuteMove(move));
                         }
 
+                        sounds.PlayCorrectMatchSound();
+
                         CreateGhostTile(selectedTiles[0]);
                         CreateGhostTile(selectedTiles[1]);
-
-                        gameScene.correctMatch.Play();
 
                         GameScene.matches++;
                     }
                     else
                     {
+                        sounds.PlayWrongMatchSound();
+
                         Debug.Log("Tiles are different!");
                         StartCoroutine(HideSelectedTiles());
-
-                        gameScene.wrongMatch.Play();
                     }
+
                     selectedTiles.Clear();
                 }
             }
-        }
-        else
-        {
-            selectedTiles.Clear();
         }
     }
 
@@ -218,9 +280,11 @@ public class Grid : MonoBehaviour
     private void CreateGhostTile(GameObject tile)
     {
         GameObject ghostTileCopy = Instantiate(ghostTile, tile.transform.position, Quaternion.identity);
+
         ghostTileCopy.GetComponent<GhostTile>().destroyable = true;
         ghostTileCopy.GetComponent<Image>().sprite = tile.GetComponent<Tile>().tile;
         ghostTileCopy.GetComponent<GhostTile>().tileY = tile.transform.position.y;
+
         ghostTileCopy.transform.SetParent(this.gameObject.transform);
     }
 }

@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class Tile : MonoBehaviour
 {
+    [HideInInspector]
     public int tileId;
     public int effectId;
     public Sprite tile;

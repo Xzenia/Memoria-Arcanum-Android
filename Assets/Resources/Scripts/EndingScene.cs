@@ -16,7 +16,7 @@ public class EndingScene : MonoBehaviour
         transitionAnimator.SetBool("SceneEnd", true);
         yield return new WaitForSeconds(1.5f);
 
-        PlayerPrefs.DeleteKey("level");
+        PlayerPrefs.DeleteKey("Level");
         SceneManager.LoadScene("MainMenu");
     }
 }
