@@ -201,6 +201,10 @@ public class GameScene : MonoBehaviour
                     specialAttackModeActivated = false;
                 }
             }
+            else if (PauseMenu.isPaused)
+            {
+                timeAmount.transform.localScale = new Vector3(time / maxTime, timeAmount.transform.localScale.y, timeAmount.transform.localScale.z);
+            }
             else
             {
                 time -= timeDecrementValue;
