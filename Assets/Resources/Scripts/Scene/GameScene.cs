@@ -70,9 +70,10 @@ public class GameScene : MonoBehaviour
 
     public static bool specialAttackModeActivated;
 
+    public GameObject pauseMenuCanvas;
+
     void Awake()
     {
-        PlayerPrefs.DeleteKey("level");
         if (!PlayerPrefs.HasKey("level"))
         {
             PlayerPrefs.SetInt("level", 1);
@@ -421,6 +422,14 @@ public class GameScene : MonoBehaviour
             SetupGameBoard();
 
             player.RevertToDefaultChargeValue();
+        }
+    }
+
+    public void PauseButtonClicked()
+    {
+        if (!PauseMenu.isPaused)
+        {
+            pauseMenuCanvas.GetComponent<PauseMenu>().PauseGame();
         }
     }
 }

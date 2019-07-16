@@ -35,6 +35,22 @@ public class Sounds : MonoBehaviour
     public AudioSource healUp;
     public AudioSource chargeFull;
 
+    public static bool sfxEnabled = true;
+
+    void Awake()
+    {
+        if (!PlayerPrefs.HasKey("Music"))
+        {
+            PlayerPrefs.SetInt("Music", 1);
+        }
+
+        if (!PlayerPrefs.HasKey("SFX"))
+        {
+            PlayerPrefs.SetInt("SFX", 1);
+        }
+
+    }
+
     void Start()
     {
         int level = PlayerPrefs.GetInt("level");
@@ -56,38 +72,79 @@ public class Sounds : MonoBehaviour
                 break;
         }
 
-        backgroundMusic.Play();
+        if (PlayerPrefs.GetInt("Music") == 1)
+        {
+            backgroundMusic.Play();
+        }
+        else
+        {
+            backgroundMusic.Pause();
+        }
+
+        if (PlayerPrefs.GetInt("SFX") == 1)
+        {
+            sfxEnabled = true;
+        }
+        else
+        {
+            sfxEnabled = false;
+        }
+    }
+
+    void Update()
+    {
+        if (PlayerPrefs.GetInt("Music") == 0)
+        {
+            backgroundMusic.Pause();
+        }
+        else if (!backgroundMusic.isPlaying && PlayerPrefs.GetInt("Music") == 1)
+        {
+            backgroundMusic.Play();
+        }
     }
 
     public void PlayEnemyAttackSound()
     {
-        enemyAttack.pitch = Random.Range(0.85f, 1f);
-        enemyAttack.Play();
+        if (sfxEnabled)
+        {
+            enemyAttack.pitch = Random.Range(0.85f, 1f);
+            enemyAttack.Play();
+        }
     }
 
     public void PlayHeroAttackSound(Player player)
     {
-        spellAttack.pitch = Random.Range(0.85f, 90f);
+        if (sfxEnabled)
+        {
+            spellAttack.pitch = Random.Range(0.85f, 90f);
 
-        if (player.name.Equals("Rikko"))
-        {
-            spellAttack.Play();
+            if (player.name.Equals("Rikko"))
+            {
+                spellAttack.Play();
+            }
+            else
+            {
+                normalAttack.Play();
+            }
         }
-        else
-        {
-            normalAttack.Play();
-        }
+
     }
 
     public void PlayCorrectMatchSound()
     {
-        correctMatch.pitch = Random.Range(0.85f, 1f);
-        correctMatch.Play();
+        if (sfxEnabled)
+        {
+            correctMatch.pitch = Random.Range(0.85f, 1f);
+            correctMatch.Play();
+        }
     }
 
     public void PlayWrongMatchSound()
     {
-        wrongMatch.pitch = Random.Range(0.85f, 1f);
-        wrongMatch.Play();
+        if (sfxEnabled)
+        {
+            wrongMatch.pitch = Random.Range(0.85f, 1f);
+            wrongMatch.Play();
+        }
     }
 }
