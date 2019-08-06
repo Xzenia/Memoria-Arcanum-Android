@@ -9,10 +9,21 @@ public class IntroductionCutscene : MonoBehaviour
 
     public Animator transitionAnimator;
 
+    public AudioSource backgroundMusic;
+
     void Start()
     {
         cutsceneIndex = 0;
-        this.gameObject.GetComponent<Image>().sprite = cutscenes[cutsceneIndex];
+        gameObject.GetComponent<Image>().sprite = cutscenes[cutsceneIndex];
+
+        if (PlayerPrefs.GetInt("Music") == 1)
+        {
+            backgroundMusic.Play();
+        }
+        else
+        {
+            backgroundMusic.Stop();
+        }
     }
 
     public void NextCutscene()
@@ -26,13 +37,12 @@ public class IntroductionCutscene : MonoBehaviour
         {
             this.gameObject.GetComponent<Image>().sprite = cutscenes[cutsceneIndex];
         }
-
     }
 
-    IEnumerator LoadScene()
+    private IEnumerator LoadScene()
     {
         transitionAnimator.SetBool("SceneEnd", true);
-        yield return new WaitForSeconds(1.5f);
+        yield return new WaitForSeconds(1f);
         SceneManager.LoadScene("CharacterSelection");
     }
 }

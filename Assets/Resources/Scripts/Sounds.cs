@@ -53,9 +53,7 @@ public class Sounds : MonoBehaviour
 
     void Start()
     {
-        int level = PlayerPrefs.GetInt("level");
-
-        switch (level)
+        switch (GameScene.level)
         {
             case 1:
                 backgroundMusic.clip = enchantedForest;
@@ -145,6 +143,14 @@ public class Sounds : MonoBehaviour
         {
             wrongMatch.pitch = Random.Range(0.85f, 1f);
             wrongMatch.Play();
+        }
+    }
+
+    public void PlayHealButtonActivatedSound()
+    {
+        if (sfxEnabled)
+        {
+            healUp.Play();
         }
     }
 }

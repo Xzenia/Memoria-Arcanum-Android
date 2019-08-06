@@ -18,12 +18,11 @@ public class DemoCompleteScene : MonoBehaviour
         StartCoroutine(LoadScene());
     }
 
-    IEnumerator LoadScene()
+    private IEnumerator LoadScene()
     {
         transitionAnimator.SetBool("SceneEnd", true);
-        yield return new WaitForSeconds(1.5f);
+        yield return new WaitForSeconds(1.0f);
 
-        PlayerPrefs.DeleteKey("level");
         SceneManager.LoadScene("MainMenu");
     }
 }

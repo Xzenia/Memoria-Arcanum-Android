@@ -14,6 +14,7 @@ ScriptsOnlyBuild:
     - LevelCompleteScene
     - LoadingScreen
     - MainMenuScene
+    - PauseMenu
     - Player
     - Sounds
     - Tile
@@ -26,8 +27,10 @@ ScriptsOnlyBuild:
     UnityEditor.Graphs.dll:
     - UnityEditor.Graphs.AnimationBlendTree.Graph
     - UnityEditor.Graphs.AnimationBlendTree.GraphGUI
+    - UnityEditor.Graphs.AnimationStateMachine.AnyStateNode
     - UnityEditor.Graphs.AnimationStateMachine.Graph
     - UnityEditor.Graphs.AnimationStateMachine.GraphGUI
+    - UnityEditor.Graphs.AnimationStateMachine.StateNode
     - UnityEditor.Graphs.AnimatorControllerTool
     UnityEditor.TestRunner.dll:
     - UnityEditor.TestTools.TestRunner.TestListCacheData
@@ -42,6 +45,8 @@ ScriptsOnlyBuild:
     - UnityEngine.UI.Image
     - UnityEngine.UI.Mask
     - UnityEngine.UI.Outline
+    - UnityEngine.UI.Text
+    - UnityEngine.UI.Toggle
     com.unity.multiplayer-hlapi.Runtime.dll:
     - UnityEngine.Networking.NetworkCallbacks
     - UnityEngine.Networking.NetworkIdentity
@@ -304,6 +309,10 @@ ScriptsOnlyBuild:
     - Class: 114
       Script: {instanceID: 9468}
     - Class: 114
+      Script: {instanceID: 9470}
+    - Class: 114
+      Script: {instanceID: 9472}
+    - Class: 114
       Script: {instanceID: 9914}
     - Class: 114
       Script: {instanceID: 10118}
@@ -322,8 +331,12 @@ ScriptsOnlyBuild:
     - Class: 114
       Script: {instanceID: 10712}
     - Class: 114
-      Script: {instanceID: 10912}
+      Script: {instanceID: 10914}
+    - Class: 114
+      Script: {instanceID: 10942}
     - Class: 115
+      Script: {instanceID: 0}
+    - Class: 128
       Script: {instanceID: 0}
     - Class: 157
       Script: {instanceID: 0}
@@ -548,6 +561,10 @@ ScriptsOnlyBuild:
     - Class: 114
       Script: {instanceID: 9468}
     - Class: 114
+      Script: {instanceID: 9470}
+    - Class: 114
+      Script: {instanceID: 9472}
+    - Class: 114
       Script: {instanceID: 9698}
     - Class: 114
       Script: {instanceID: 9884}
@@ -604,7 +621,7 @@ ScriptsOnlyBuild:
     className: TMP_Dropdown
   - hash:
       serializedVersion: 2
-      Hash: b2dc1c8c03d63c8c709b39caa5517f56
+      Hash: 042eadf5c1b4033bd731e5baf45cac87
     assemblyName: Assembly-CSharp.dll
     namespaceName: 
     className: GameOverScene
@@ -622,7 +639,7 @@ ScriptsOnlyBuild:
     className: TMP_ScrollbarEventHandler
   - hash:
       serializedVersion: 2
-      Hash: 7ff703eaf6d74d633a07a4b1b8e17465
+      Hash: 8ce310989989c99882dfae1879a7bc15
     assemblyName: Assembly-CSharp.dll
     namespaceName: 
     className: IntroductionCutscene
@@ -1132,13 +1149,13 @@ ScriptsOnlyBuild:
     className: ControlTrack
   - hash:
       serializedVersion: 2
-      Hash: 3627da89e37e87923379e6150c0d5acb
+      Hash: bd081bd89456a6f5f67934ea9c87c573
     assemblyName: Assembly-CSharp.dll
     namespaceName: 
     className: GameScene
   - hash:
       serializedVersion: 2
-      Hash: b2dc1c8c03d63c8c709b39caa5517f56
+      Hash: 042eadf5c1b4033bd731e5baf45cac87
     assemblyName: Assembly-CSharp.dll
     namespaceName: 
     className: EndingScene
@@ -1192,7 +1209,7 @@ ScriptsOnlyBuild:
     className: TMP_SpriteAnimator
   - hash:
       serializedVersion: 2
-      Hash: b2dc1c8c03d63c8c709b39caa5517f56
+      Hash: 2d5e3d8cbc34bb8045185c2db442ff3d
     assemblyName: Assembly-CSharp.dll
     namespaceName: 
     className: MainMenuScene
@@ -1204,7 +1221,7 @@ ScriptsOnlyBuild:
     className: Player
   - hash:
       serializedVersion: 2
-      Hash: 7642e2694fa97dc1a7f07bd12df5c5dd
+      Hash: 09aabc7ce2dbe9eed6db94046787daaf
     assemblyName: Assembly-CSharp.dll
     namespaceName: 
     className: Grid
@@ -1336,7 +1353,7 @@ ScriptsOnlyBuild:
     className: NetworkBehaviour
   - hash:
       serializedVersion: 2
-      Hash: ae96e1a59065415b8ed4ad38eef2669d
+      Hash: dc5995354a373992d8f3b1cd733fbaf6
     assemblyName: Assembly-CSharp.dll
     namespaceName: 
     className: LevelCompleteScene
@@ -1430,6 +1447,12 @@ ScriptsOnlyBuild:
     assemblyName: Unity.Timeline.dll
     namespaceName: UnityEngine.Timeline
     className: SignalEmitter
+  - hash:
+      serializedVersion: 2
+      Hash: c37c1cfd07e199f866839cfef1a2f101
+    assemblyName: Assembly-CSharp.dll
+    namespaceName: 
+    className: PauseMenu
   - hash:
       serializedVersion: 2
       Hash: c3d3430df9e3ea95e3e3d587961390fb

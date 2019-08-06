@@ -7,6 +7,5 @@ public class Move
     public string name;
     public string description;
     public float attack = 0;
-    public float defense = 0;
     public float health = 0;
 }

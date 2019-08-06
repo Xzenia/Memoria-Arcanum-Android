@@ -12,6 +12,19 @@ public class CharacterSelectionScene : MonoBehaviour
     public Animator transitionAnimator;
 
     public AudioSource backgroundMusic;
+
+    void Start()
+    {
+        if (PlayerPrefs.GetInt("Music") == 1)
+        {
+            backgroundMusic.Play();
+        }
+        else
+        {
+            backgroundMusic.Stop();
+        }
+    }
+
     public void CharacterSelected()
     {
         if (EventSystem.current.currentSelectedGameObject.name.Equals("Shou"))
@@ -35,11 +48,14 @@ public class CharacterSelectionScene : MonoBehaviour
         StartCoroutine(LoadScene());
     }
 
-    IEnumerator LoadScene()
+    private IEnumerator LoadScene()
     {
         transitionAnimator.SetBool("SceneEnd", true);
 
-        backgroundMusic.Stop();
+        if (backgroundMusic.isPlaying)
+        {
+            backgroundMusic.Stop();
+        }
 
         yield return new WaitForSeconds(1f);
 

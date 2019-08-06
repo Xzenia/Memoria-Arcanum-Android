@@ -69,6 +69,7 @@
     <Compile Include="Assets\Resources\Scripts\LoadingScreen.cs" />
     <Compile Include="Assets\Resources\Scripts\Model\Enemy.cs" />
     <Compile Include="Assets\Resources\Scripts\Model\Entity.cs" />
+    <Compile Include="Assets\Resources\Scripts\Model\GameData.cs" />
     <Compile Include="Assets\Resources\Scripts\Model\GhostTile.cs" />
     <Compile Include="Assets\Resources\Scripts\Model\Move\Move.cs" />
     <Compile Include="Assets\Resources\Scripts\Model\Move\MoveSets.cs" />

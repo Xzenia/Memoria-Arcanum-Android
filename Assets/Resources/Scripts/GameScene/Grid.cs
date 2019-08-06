@@ -17,8 +17,6 @@ public class Grid : MonoBehaviour
 
     public GameObject[] healingTiles;
 
-    public GameObject[] gameTiles;
-
     public GameObject potionTile;
 
     public Sprite defaultSprite;
@@ -33,12 +31,16 @@ public class Grid : MonoBehaviour
 
     public GameObject ghostTile;
 
+    public GameObject gridParentObject; // The parent of all instantiated tile objects. 
+
+    public GameObject defaultTile; 
+
     void Start()
     {
         selectedTiles = new List<GameObject>();
     }
 
-    public List<Tile> GenerateTile()
+    public List<Tile> SetupGameTiles(int rows, int columns)
     {
         if (GameScene.player.name.Equals("Shou"))
         {
@@ -84,6 +86,7 @@ public class Grid : MonoBehaviour
         }
 
         List<Tile> tileList = new List<Tile>();
+
         foreach (GameObject gameObject in characterTiles)
         {
             tileList.Add(gameObject.GetComponent<Tile>());
@@ -91,7 +94,7 @@ public class Grid : MonoBehaviour
 
         if (GameScene.healthPotionActivated)
         {
-            sounds.healUp.Play();
+            sounds.PlayHealButtonActivatedSound();
 
             int randomIndex = Random.Range(0, healingTiles.Length);
             for (int counter = 0; counter < 4; counter++)
@@ -100,11 +103,25 @@ public class Grid : MonoBehaviour
             }
         }
 
-        //TODO: Rewrite tile generation code into something much simpler.
+        int totalGridCount = rows * columns;
+
+        Debug.Log("Row: " + rows + "\nColumns: " + columns);
+        Debug.Log("Total Grid Count: " + totalGridCount);
+
+        List<Tile> tiles = GenerateGridContents(totalGridCount, tileList);
+
+        tiles = Extensions.ShuffleTiles(tiles);
+
+        return tiles;
+    }
+
+    private List<Tile> GenerateGridContents(int numberOfTiles, List<Tile> tileList)
+    {
+        List<Tile> tiles = new List<Tile>();
+
         int timesPotionTileHasBeenSpawned = 0;
 
-        List<Tile> tiles = new List<Tile>();
-        for (int counter = 0; counter < 13; counter++)
+        for (int counter = 0; counter < numberOfTiles/2; counter++)
         {
             int randomIndex = Random.Range(0, tileList.Count);
 
@@ -130,24 +147,43 @@ public class Grid : MonoBehaviour
             }
         }
 
-        Extensions.ShuffleTiles(tiles);
-
-        GameScene.healthPotionActivated = false;
-
         return tiles;
     }
 
-    public void FillTileBoard(List<Tile> tile)
+    public void FillTileBoard(List<Tile> tile, int rows, int columns)
     {
-        for (int counter = 0; counter < 25; counter++)
+        if (gridParentObject.transform.childCount > 0)
         {
-            gameTiles[counter].GetComponent<Tile>().tileId = counter;
-            gameTiles[counter].GetComponent<Tile>().tile = tile[counter].tile;
-            gameTiles[counter].GetComponent<Tile>().tileType = tile[counter].tileType;
-            gameTiles[counter].GetComponent<Tile>().character = tile[counter].character;
-            gameTiles[counter].GetComponent<Tile>().effectId = tile[counter].effectId;
+            foreach (Transform child in gridParentObject.transform)
+            {
+                Destroy(child.gameObject);
+            }
+        }
+
+        int totalCounter = 0;
+
+        gridParentObject.GetComponent<GridLayoutGroup>().constraintCount = columns;
+
+        for (int rowCounter = 0; rowCounter < rows; rowCounter++)
+        {
+            for (int columnCounter = 0; columnCounter < columns; columnCounter++)
+            {
+                GameObject generatedTile = Instantiate(defaultTile) as GameObject;
+
+                generatedTile.GetComponent<Tile>().tileId = totalCounter;
+                generatedTile.GetComponent<Tile>().tile = tile[totalCounter].tile;
+                generatedTile.GetComponent<Tile>().tileType = tile[totalCounter].tileType;
+                generatedTile.GetComponent<Tile>().character = tile[totalCounter].character;
+                generatedTile.GetComponent<Tile>().effectId = tile[totalCounter].effectId;
+
+                generatedTile.transform.SetParent(gridParentObject.transform);
+
+                totalCounter++;
+
+            }
         }
     }
+
     public IEnumerator ShowAndHideTileContents()
     {
         ShowTileBoardContents();
@@ -163,30 +199,47 @@ public class Grid : MonoBehaviour
 
     public void ShowTileBoardContents()
     {
-        foreach (GameObject gameObject in gameTiles)
+        foreach (Transform children in gridParentObject.transform)
         {
-            gameObject.GetComponent<Image>().sprite = gameObject.GetComponent<Tile>().tile;
+            children.gameObject.GetComponent<Image>().sprite = children.gameObject.GetComponent<Tile>().tile;
         }
     }
 
     public void HideTileBoardContents()
     {
-        foreach (GameObject gameObject in gameTiles)
+        foreach (Transform children in gridParentObject.transform)
         {
-            gameObject.GetComponent<Image>().sprite = defaultSprite;
+            children.gameObject.GetComponent<Image>().sprite = defaultSprite;
         }
     }
 
     private GameObject chosenTile1;
     private GameObject chosenTile2;
 
-    void FixedUpdate()
+    private bool doneFlipping = true; //This is set to true by default so it doesn't trigger the tile flip code prematurely.
+
+    void Update()
     {
-        if (flipXValue < 1 && EventSystem.current.currentSelectedGameObject != null)
+        // TODO: Tile flip code could be written better! Refine this hacky mess! 
+        if (!doneFlipping)
         {
             GameObject tileToFlip = EventSystem.current.currentSelectedGameObject;
-            flipXValue += 0.2f;
-            tileToFlip.transform.localScale = new Vector3(flipXValue, tileToFlip.transform.localScale.y, tileToFlip.transform.localScale.z);
+
+            if (tileToFlip != null)
+            {
+                flipXValue += 0.2f;
+
+                if (flipXValue >= 1.05)  // Prevents the tile from being slightly bigger in width than unselected tiles aside from stopping the animation.
+                {                        // 1.05 is apparently the most convincing localScale.x value that looks close to the width of unselected tiles. 
+                    doneFlipping = true; // 1.0f is way too thin compared to unselected tiles and 1.2f is way too wide. 
+                }
+
+                tileToFlip.transform.localScale = new Vector3(flipXValue, tileToFlip.transform.localScale.y, tileToFlip.transform.localScale.z);
+            }
+            else
+            {
+                doneFlipping = true;
+            }
         }
 
         if (!GameScene.playerTurnHasStarted)
@@ -201,8 +254,15 @@ public class Grid : MonoBehaviour
         {
             if (EventSystem.current.currentSelectedGameObject.GetComponent<Image>().sprite.Equals(defaultSprite))
             {
-                EventSystem.current.currentSelectedGameObject.GetComponent<Image>().sprite = EventSystem.current.currentSelectedGameObject.GetComponent<Tile>().tile;
-                flipXValue = 0.2f; //Flip card.
+                var selectedTile = EventSystem.current.currentSelectedGameObject;
+                selectedTile.GetComponent<Image>().sprite = EventSystem.current.currentSelectedGameObject.GetComponent<Tile>().tile;
+
+                if (Input.touches.Length < 2)
+                {
+                    flipXValue = 0.2f; // Initial localscale.x value of the selected tile when it begins to flip.
+
+                    doneFlipping = false; // Flip card.
+                }
 
                 selectedTiles.Add(EventSystem.current.currentSelectedGameObject);
 
@@ -216,6 +276,9 @@ public class Grid : MonoBehaviour
                         Debug.Log("Tiles are similar!");
 
                         Tile tile = chosenTile1.GetComponent<Tile>();
+
+                        GameScene.pairedTiles.Add(tile);
+
                         if (tile.tileType == TileType.Item)
                         {
                             switch (tile.effectId)
@@ -244,7 +307,7 @@ public class Grid : MonoBehaviour
                             {
                                 GameScene.player.IncreaseCharge(10);
                             }
-
+                            
                             StartCoroutine(gameScene.ExecuteMove(move));
                         }
 
@@ -269,7 +332,7 @@ public class Grid : MonoBehaviour
         }
     }
 
-    IEnumerator HideSelectedTiles()
+    private IEnumerator HideSelectedTiles()
     {
         yield return new WaitForSeconds((float)0.5);
 
@@ -285,6 +348,6 @@ public class Grid : MonoBehaviour
         ghostTileCopy.GetComponent<Image>().sprite = tile.GetComponent<Tile>().tile;
         ghostTileCopy.GetComponent<GhostTile>().tileY = tile.transform.position.y;
 
-        ghostTileCopy.transform.SetParent(this.gameObject.transform);
+        ghostTileCopy.transform.SetParent(gameObject.transform);
     }
 }

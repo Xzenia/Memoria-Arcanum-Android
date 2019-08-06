@@ -6,15 +6,34 @@ public class GameOverScene : MonoBehaviour
 {
     public Animator transitionAnimator;
 
-    public void ScreenClicked()
+    public AudioSource backgroundMusic;
+
+    void Start()
     {
-        StartCoroutine(LoadScene());
+        if (PlayerPrefs.GetInt("Music") == 1)
+        {
+            backgroundMusic.Play();
+        }
+        else
+        {
+            backgroundMusic.Stop();
+        }
     }
 
-    IEnumerator LoadScene()
+    public void ContinueButtonClicked()
+    {
+        StartCoroutine(LoadScene("LoadingScreen"));
+    }
+
+    public void ExitButtonClicked()
+    {
+        StartCoroutine(LoadScene("MainMenu"));
+    }
+
+    private IEnumerator LoadScene(string name)
     {
         transitionAnimator.SetBool("SceneEnd", true);
-        yield return new WaitForSeconds(1.5f);
-        SceneManager.LoadScene("MainMenu");
+        yield return new WaitForSeconds(1f);
+        SceneManager.LoadScene(name);
     }
 }

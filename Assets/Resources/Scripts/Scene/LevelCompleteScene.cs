@@ -10,7 +10,8 @@ public class LevelCompleteScene : MonoBehaviour
 
     public Animator transitionAnimator;
 
-    private int level;
+    public AudioSource backgroundMusic;
+
     private int matches;
     private int totalTileCount;
     private float grade;
@@ -18,8 +19,9 @@ public class LevelCompleteScene : MonoBehaviour
 
     void Start()
     {
-        level = PlayerPrefs.GetInt("level") + 1;
-        PlayerPrefs.SetInt("level", level);
+        GameScene.level++;
+
+        SaveGameData();
 
         matches = GameScene.matches;
         totalTileCount = GameScene.gridResetCount * 12;
@@ -66,7 +68,7 @@ public class LevelCompleteScene : MonoBehaviour
 
         matchesCounter.text = "Matches: " + matches.ToString() +" / " +totalTileCount.ToString() +"\n Rank: " +rank;
 
-        switch (level)
+        switch (GameScene.level)
         {
             case 1:
                 levelName.text = "The Enchanted Forest";
@@ -84,8 +86,17 @@ public class LevelCompleteScene : MonoBehaviour
                 Debug.LogError("(LevelCompleteScene) Start(): Switch case defaulted! Level number is invalid.");
                 levelName.text = "The Enchanted Forest";
 
-                PlayerPrefs.SetInt("level", 1);
+                GameScene.level = 1;
                 break;
+        }
+
+        if (PlayerPrefs.GetInt("Music") == 1)
+        {
+            backgroundMusic.Play();
+        }
+        else
+        {
+            backgroundMusic.Stop();
         }
     }
 
@@ -94,12 +105,31 @@ public class LevelCompleteScene : MonoBehaviour
         StartCoroutine(LoadScene());
     }
 
-    IEnumerator LoadScene()
+    public void SaveGameData()
+    {
+        var gameData = new GameData();
+
+        if (GameScene.player == null)
+        {
+            Debug.LogError("SaveGameData(): GameScene.player is null! Defaulting to Shou...");
+
+            GameScene.player = new Player();
+            GameScene.player.name = "Shou";
+        }
+
+        gameData.playerCharacterName = GameScene.player.name;
+
+        gameData.level = GameScene.level;
+
+        GameData.SaveData(gameData);
+    }
+
+    private IEnumerator LoadScene()
     {
         transitionAnimator.SetBool("SceneEnd", true);
-        yield return new WaitForSeconds(1.5f);
+        yield return new WaitForSeconds(1f);
 
-        if (level >= 4)
+        if (GameScene.level >= 4)
         {
             SceneManager.LoadScene("EndingScene");
         }

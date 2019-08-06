@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
+using System;
+
 public class GameScene : MonoBehaviour
 {
     public GameObject grid;
@@ -17,26 +19,14 @@ public class GameScene : MonoBehaviour
 
     public static List<Tile> pairedTiles;
 
-    public GameObject matchCounter;
-    public GameObject potionCounter;
-
-    public GameObject playerTurnIndicator;
-    public GameObject enemyTurnIndicator;
-
     public GameObject playerSprite;
     public GameObject shou;
     public GameObject rikko;
     public GameObject emily;
 
     public GameObject enemySprite;
+
     private GameObject[] enemies;
-
-    public Image playerHealthBarAmount;
-    public Image enemyHealthBarAmount;
-    public Image timeAmount;
-
-    public GameObject playerDamageCounter;
-    public GameObject enemyDamageCounter;
 
     public static Player player;
 
@@ -50,11 +40,34 @@ public class GameScene : MonoBehaviour
 
     public static bool playerHasDied;
 
+    private bool demoMode = false;
+
+    public static int gridResetCount;
+
+    public static bool specialAttackModeActivated;
+
+    public static int level;
+
+    private List<Tile> tileList;
+
+    private List<Tuple<int, int>> rowsAndColumnCountList; //TODO: Needs a better name. 
+
+    //UI 
+    public GameObject matchCounter;
+    public GameObject potionCounter;
+
+    public GameObject playerDamageCounter;
+    public GameObject enemyDamageCounter;
+
     public GameObject memorizePopup;
 
     public Animator gridBackground;
 
-    private bool demoMode = false;
+    public GameObject pauseMenuCanvas;
+
+    public GameObject tapEffect;
+
+    public Animator enemyAttackAnimation;
 
     public Image chargeBarAmount;
 
@@ -62,41 +75,69 @@ public class GameScene : MonoBehaviour
 
     public Sounds sounds;
 
-    public static int gridResetCount;
-
-    public Animator enemyAttackAnimation;
-
-    public GameObject tapEffect;
-
-    public static bool specialAttackModeActivated;
-
-    public GameObject pauseMenuCanvas;
+    public Image playerHealthBarAmount;
+    public Image enemyHealthBarAmount;
+    public Image timeAmount;
 
     void Awake()
     {
-        if (!PlayerPrefs.HasKey("level"))
+        var gameData = new GameData();
+
+        var loadedData = GameData.LoadData();
+
+        if (loadedData != null)
         {
-            PlayerPrefs.SetInt("level", 1);
+            gameData = loadedData;
+
+            player = new Player();
+
+            player.name = gameData.playerCharacterName;
+
+            switch (player.name)
+            {
+                case "Shou":
+                    player = shou.GetComponent<Player>();
+                    break;
+                case "Emily":
+                    player = emily.GetComponent<Player>();
+                    break;
+                case "Rikko":
+                    player = rikko.GetComponent<Player>();
+                    break;
+                default:
+                    Debug.LogError("GameScene(): playerCharacterName switch case defaulted! There is GameData but is has an invalid character name! Reverting to Shou...");
+                    player = shou.GetComponent<Player>();
+                    break;
+            }
         }
+        else
+        {
+            if (player == null)
+            {
+                Debug.LogError("Start(): player variable is null! Defaulting to Shou.");
+                player = shou.GetComponent<Player>();
+            }
+
+            player.ResetPlayerValues();
+            gameData.level = 1;
+        }
+
+        level = gameData.level;
+
+        //Pause menu initialization
+        PauseMenu.isPaused = false;
     }
 
     void Start()
     {
         InitializeValues();
 
-        if (player == null)
-        {
-            Debug.LogError("Start(): player variable is null! Defaulting to Shou.");
-            player = shou.GetComponent<Player>();
-        }
-        player.ResetPlayerValues();
-
         SetupGameBoard();
 
         potionCounter.GetComponent<TMPro.TextMeshProUGUI>().text = potionCount.ToString();
 
         if (player.name.Equals("Shou"))
-        {
+        { 
             playerSprite.GetComponent<Image>().sprite = shou.GetComponent<Image>().sprite;
             playerSprite.GetComponent<Animator>().runtimeAnimatorController = shou.GetComponent<Animator>().runtimeAnimatorController;
         }
@@ -142,20 +183,34 @@ public class GameScene : MonoBehaviour
         gridResetCount = 0;
 
         specialAttackModeActivated = false;
+
+        tileList = new List<Tile>();
+        // This tuple represents row and column. Tuple<row, column>. 
+        // When adding new combinations, make sure it is even when multiplied. Otherwise, you will have tiles with no pairs. 
+        // At the moment, the maximum amount of rows and columns that can be placed in-game without overflowing is 5. This might be fixed soon. 
+        rowsAndColumnCountList = new List<Tuple<int, int>>();
+        rowsAndColumnCountList.Add(new Tuple<int,int> (4, 3));
+        rowsAndColumnCountList.Add(new Tuple<int, int>(3, 4));
+        rowsAndColumnCountList.Add(new Tuple<int, int>(5, 4));
+        rowsAndColumnCountList.Add(new Tuple<int, int>(4, 5));
     }
 
     public void PotionButtonClicked()
     {
-        //Prevents the button from activating twice (!healthPotionActivated) and in a time when it would be
-        //unlikely to make a pair (time > 3). 
-        if (potionCount > 0 && !healthPotionActivated && time > 3)
+        // Prevents the button from activating twice (!healthPotionActivated) and in a time when it would be
+        // unlikely to make a pair (time > 3). It also does not activate when the player is at max health. 
+        if (potionCount > 0 && !healthPotionActivated && player.health != player.maxHealth)
         {
-            potionCount--;
-            healthPotionActivated = true;
+            if (playerTurnHasStarted && time > 3)
+            {
+                potionCount--;
 
-            playerTurnHasStarted = false;
+                healthPotionActivated = true;
 
-            SetupGameBoard();
+                playerTurnHasStarted = false;
+
+                SetupGameBoard();
+            }
         }
     }
 
@@ -189,10 +244,7 @@ public class GameScene : MonoBehaviour
         {
             if (time <= 0 || enemyHasDied)
             {
-                if (!healthPotionActivated)
-                { 
-                    StartCoroutine(PlayerTurnHasEnded());
-                }
+                StartCoroutine(PlayerTurnHasEnded());
 
                 playerTurnHasStarted = false;
 
@@ -200,6 +252,14 @@ public class GameScene : MonoBehaviour
                 {
                     specialAttackModeActivated = false;
                 }
+            }
+            else if (pairedTiles.Count == (tileList.Count / 2))
+            {
+                playerTurnHasStarted = false;
+                healthPotionActivated = false;
+                specialAttackModeActivated = false;
+
+                SetupGameBoard();
             }
             else if (PauseMenu.isPaused)
             {
@@ -217,13 +277,10 @@ public class GameScene : MonoBehaviour
             timeAmount.transform.localScale = new Vector3(time / maxTime, timeAmount.transform.localScale.y, timeAmount.transform.localScale.z);
         }
 
-        //Popups
+        // Popups
         if (playerTurnHasStarted)
         {
-            enemyTurnIndicator.SetActive(false);
             memorizePopup.SetActive(false);
-
-            playerTurnIndicator.SetActive(true);
         }
         else
         {
@@ -233,8 +290,8 @@ public class GameScene : MonoBehaviour
 
     void FixedUpdate()
     {
-        //Player health bar
-        //Value correction measures. 
+        // Player health bar
+        // Value correction measures. 
         if (player.health > player.maxHealth)
         {
             player.health = player.maxHealth;
@@ -259,10 +316,10 @@ public class GameScene : MonoBehaviour
             gridBackground.SetBool("Player Health Critical", false);
         }
 
-        //Enemy health bar 
+        // Enemy health bar 
         var enemy = currentEnemyObject.GetComponent<Enemy>();
 
-        //Value correction measures. 
+        // Value correction measures. 
         if (enemy.health > enemy.maxHealth)
         {
             enemy.health = enemy.maxHealth;
@@ -277,33 +334,25 @@ public class GameScene : MonoBehaviour
 
         enemyHealthBarAmount.transform.localScale = new Vector3(enemy.health / enemy.maxHealth, enemyHealthBarAmount.transform.localScale.y, enemyHealthBarAmount.transform.localScale.z);
 
-        //Player charge bar
+        // Player charge bar
         chargeBarAmount.transform.localScale = new Vector3(chargeBarAmount.transform.localScale.x, (player.charge / player.maxCharge), chargeBarAmount.transform.localScale.z);
 
         if (player.charge == player.maxCharge)
         {
-            //sounds.chargeFull.Play();
-
             chargeBarAnimation.SetBool("IsFull", true);
         }
         else
         {
-            //sounds.chargeFull.Stop();
-
             chargeBarAnimation.SetBool("IsFull", false);
         }
     }
 
-    IEnumerator PlayerTurnHasEnded()
+    private IEnumerator PlayerTurnHasEnded()
     {
-        playerTurnIndicator.SetActive(false);
-
-        yield return new WaitForSeconds(0.5f);
-
         if (enemyHasDied)
         {
             enemySprite.GetComponent<Animator>().SetBool("IsDead", true);
-            yield return new WaitForSeconds(1.5f);
+            yield return new WaitForSeconds(1f);
 
             enemyEncounterList.RemoveAt(0);
 
@@ -322,17 +371,22 @@ public class GameScene : MonoBehaviour
             {
                 LoadNewEnemy();
             }
-
-            enemyHasDied = false;
         }
         else
         {
+
             BeginEnemyTurn();
         }
 
-        grid.GetComponent<Grid>().HideTileBoardContents();
+        if (!enemyHasDied)
+        {
+            grid.GetComponent<Grid>().HideTileBoardContents();
 
-        yield return new WaitForSeconds(2f);
+            yield return new WaitForSeconds(2f);
+        }
+
+        enemyHasDied = false;
+        healthPotionActivated = false;
 
         SetupGameBoard();
     }
@@ -340,8 +394,6 @@ public class GameScene : MonoBehaviour
     public void BeginEnemyTurn()
     {
         Enemy enemy = currentEnemyObject.GetComponent<Enemy>();
-
-        enemyTurnIndicator.SetActive(true);
 
         switch (enemy.attackType)
         {
@@ -379,7 +431,7 @@ public class GameScene : MonoBehaviour
         }
     }
 
-    IEnumerator ShowDamageCounter(GameObject damageCounter, float damage)
+    private IEnumerator ShowDamageCounter(GameObject damageCounter, float damage)
     {
         damageCounter.GetComponent<TMPro.TextMeshProUGUI>().text = ""+(int)damage;
         damageCounter.SetActive(true);
@@ -391,14 +443,18 @@ public class GameScene : MonoBehaviour
 
     private void SetupGameBoard()
     {
-        List <Tile> tileList = grid.GetComponent<Grid>().GenerateTile();
-        grid.GetComponent<Grid>().FillTileBoard(tileList);
+        int rowAndColumnCountListSelectedIndex = UnityEngine.Random.Range(0, rowsAndColumnCountList.Count);
+        Tuple<int, int> rowAndColumnCount = rowsAndColumnCountList[rowAndColumnCountListSelectedIndex];
+        tileList = grid.GetComponent<Grid>().SetupGameTiles(rowAndColumnCount.Item1, rowAndColumnCount.Item2);
+        grid.GetComponent<Grid>().FillTileBoard(tileList, rowAndColumnCount.Item1, rowAndColumnCount.Item2);
         grid.GetComponent<Grid>().StartCoroutine(grid.GetComponent<Grid>().ShowAndHideTileContents());
 
         if (!healthPotionActivated)
         {
             gridResetCount++;
         }
+
+        pairedTiles.Clear(); // TODO: pairedTiles.Clear() is best put somewhere else other than SetupGameBoard().
     }
 
     private void LoadNewEnemy()
@@ -412,6 +468,9 @@ public class GameScene : MonoBehaviour
         float currentEnemyObjectHeight = currentEnemyObjectRectTransform.rect.height;
         float currentEnemyObjectWidth = currentEnemyObjectRectTransform.rect.width;
 
+        float currentEnemyYPivot = currentEnemyObjectRectTransform.pivot.y;
+
+        enemySpriteRectTransform.pivot.Set(enemySpriteRectTransform.pivot.x, currentEnemyYPivot);
         enemySpriteRectTransform.sizeDelta = new Vector2(currentEnemyObjectWidth, currentEnemyObjectHeight);
 
         enemySprite.GetComponent<Animator>().runtimeAnimatorController = currentEnemyObject.GetComponent<Animator>().runtimeAnimatorController;

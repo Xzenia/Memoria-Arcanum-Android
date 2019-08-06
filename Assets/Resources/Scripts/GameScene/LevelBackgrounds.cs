@@ -19,9 +19,7 @@ public class LevelBackgrounds : MonoBehaviour
 
     void Start()
     {
-        int level = PlayerPrefs.GetInt("level");
-
-        switch (level)
+        switch (GameScene.level)
         {
             case 1:
                 levelTop.sprite = enchantedForestTop;
